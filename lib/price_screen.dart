@@ -12,23 +12,26 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
+  List<CoinModel> coinsList = [];
 
-  //TODO: 2. Remove everything from the coinsList
-  List<CoinModel> coinsList = [
-    CoinModel(icon: 'btc', name: 'Bitcoin', price: 16800),
-    CoinModel(icon: 'eth', name: 'Ethereum', price: 1200),
-    CoinModel(icon: 'ltc', name: 'Litecoin', price: 62.5),
-  ];
+  Future<void> getCoinsValue() async {
+    try {
+      List<CoinModel> data = await CoinData().getCoinData(selectedCurrency);
+      if (data.isNotEmpty) {
+        setState(() {
+          coinsList = data;
+        });
+      }
+    } catch (e) {
+      print('Error fetching coin data: $e');
+    }
+  }
 
-  //TODO: 3. Create a function of type Future, called getCoinsValue
-  //TODO: 3.1 Use a try and catch block just make sure the code won't crash your app. Use the following links to learn more about Exception Handling in Dart.
-  // https://medium.com/run-dart/dart-dartlang-introduction-exception-handling-f9f088906f7c
-  // https://www.tutorialspoint.com/dart_programming/dart_programming_exceptions.htm
-
-  //TODO: 3.2 create a variable called data and assign it to what getCoinData from CoinData class returns
-  //TODO: 3.3 If the data was not null, call the setState function, and inside the function assign data to the coins List.
-
-  //TODO: 4. override the initState function, and inside the function call the getCoinsValue function.
+  @override
+  void initState() {
+    super.initState();
+    getCoinsValue();
+  }
 
   CupertinoPicker getCupertinoPicker() {
     List<Text> pickerItems = [];
@@ -38,7 +41,8 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
       itemExtent: 32,
       onSelectedItemChanged: (selectedIndex) {
-        //TODO: 6. Call the getCoinsValue, when an item is selected from the picker
+        selectedCurrency = currenciesList[selectedIndex];
+        getCoinsValue();
       },
       children: pickerItems,
     );
@@ -70,7 +74,7 @@ class _PriceScreenState extends State<PriceScreen> {
           onChanged: (value) {
             setState(() {
               selectedCurrency = value!;
-              //TODO: 5. Call the getCoinsValue, when an item is selected from the dropdown menu
+              getCoinsValue();
             });
           },
         ),
@@ -108,7 +112,6 @@ class _PriceScreenState extends State<PriceScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Image.asset(
-                          //TODO: 7. use toLowerCase function on icon to lower case the icon name
                           'images/${coinsList[index].icon}.png',
                           width: 60,
                         ),
@@ -142,16 +145,16 @@ class _PriceScreenState extends State<PriceScreen> {
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
-                    const Divider(),
+                const Divider(),
                 itemCount: coinsList.length,
               ),
             ),
             Container(
               padding:
-                  EdgeInsets.symmetric(horizontal: Platform.isIOS ? 0 : 8.0),
+              EdgeInsets.symmetric(horizontal: Platform.isIOS ? 0 : 8.0),
               height: Platform.isIOS ? 150 : 60,
               child:
-                  Platform.isIOS ? getCupertinoPicker() : getDropdownButton(),
+              Platform.isIOS ? getCupertinoPicker() : getDropdownButton(),
             ),
           ],
         ),
